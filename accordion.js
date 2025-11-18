@@ -11,20 +11,67 @@
 
 const accordionBtns = document.querySelectorAll(".accordion");
 
+// Function to toggle accordion panel
+function toggleAccordion(button) {
+  const isExpanded = button.getAttribute("aria-expanded") === "true";
+  const content = button.nextElementSibling;
+  
+  // Toggle visual state
+  button.classList.toggle("is-open");
+  
+  // Update ARIA attributes
+  button.setAttribute("aria-expanded", !isExpanded);
+  content.setAttribute("aria-hidden", isExpanded);
+  
+  // Toggle content visibility
+  if (content.style.maxHeight) {
+    // Accordion is open, close it
+    content.style.maxHeight = null;
+  } else {
+    // Accordion is closed, open it
+    content.style.maxHeight = content.scrollHeight + "px";
+  }
+}
+
+// Set up click handlers
 accordionBtns.forEach((accordion) => {
   accordion.onclick = function () {
-    this.classList.toggle("is-open");
-
-    let content = this.nextElementSibling;
-    console.log(content);
-
-    if (content.style.maxHeight) {
-      //this is if the accordion is open
-      content.style.maxHeight = null;
-    } else {
-      //if the accordion is currently closed
-      content.style.maxHeight = content.scrollHeight + "px";
-      console.log(content.style.maxHeight);
-    }
+    toggleAccordion(this);
   };
+  
+  // Keyboard interaction handlers
+  accordion.addEventListener("keydown", function(event) {
+    const buttons = Array.from(accordionBtns);
+    const currentIndex = buttons.indexOf(this);
+    
+    switch(event.key) {
+      case "Enter":
+      case " ": // Spacebar
+        event.preventDefault();
+        toggleAccordion(this);
+        break;
+        
+      case "ArrowDown":
+        event.preventDefault();
+        const nextIndex = (currentIndex + 1) % buttons.length;
+        buttons[nextIndex].focus();
+        break;
+        
+      case "ArrowUp":
+        event.preventDefault();
+        const prevIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+        buttons[prevIndex].focus();
+        break;
+        
+      case "Home":
+        event.preventDefault();
+        buttons[0].focus();
+        break;
+        
+      case "End":
+        event.preventDefault();
+        buttons[buttons.length - 1].focus();
+        break;
+    }
+  });
 });
